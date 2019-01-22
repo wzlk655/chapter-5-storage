@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.camp.bit.todolist.NoteOperator;
 import com.camp.bit.todolist.R;
 import com.camp.bit.todolist.beans.Note;
 
@@ -19,7 +20,12 @@ import java.util.List;
  */
 public class NoteListAdapter extends RecyclerView.Adapter<NoteViewHolder> {
 
+    private final NoteOperator operator;
     private final List<Note> notes = new ArrayList<>();
+
+    public NoteListAdapter(NoteOperator operator) {
+        this.operator = operator;
+    }
 
     public void refresh(List<Note> newNotes) {
         notes.clear();
@@ -34,7 +40,7 @@ public class NoteListAdapter extends RecyclerView.Adapter<NoteViewHolder> {
     public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int pos) {
         View itemView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_note, parent, false);
-        return new NoteViewHolder(itemView);
+        return new NoteViewHolder(itemView, operator);
     }
 
     @Override

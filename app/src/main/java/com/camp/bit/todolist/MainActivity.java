@@ -1,6 +1,7 @@
 package com.camp.bit.todolist;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -65,7 +66,17 @@ public class MainActivity extends AppCompatActivity {
                 LinearLayoutManager.VERTICAL, false));
         recyclerView.addItemDecoration(
                 new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
-        notesAdapter = new NoteListAdapter();
+        notesAdapter = new NoteListAdapter(new NoteOperator() {
+            @Override
+            public void deleteNote(Note note) {
+                MainActivity.this.deleteNote(note);
+            }
+
+            @Override
+            public void updateNote(Note note) {
+                MainActivity.this.updateNode(note);
+            }
+        });
         recyclerView.setAdapter(notesAdapter);
 
         notesAdapter.refresh(loadNotesFromDatabase());
@@ -118,19 +129,18 @@ public class MainActivity extends AppCompatActivity {
         List<Note> result = new LinkedList<>();
         Cursor cursor = null;
         try {
-            cursor = database.query(TodoNote.TABLE_NAME,
-                    new String[]{TodoNote.COLUMN_CONTENT, TodoNote.COLUMN_DATE,
-                            TodoNote.COLUMN_STATE},
+            cursor = database.query(TodoNote.TABLE_NAME, null,
                     null, null,
                     null, null,
                     TodoNote.COLUMN_DATE + " DESC");
 
             while (cursor.moveToNext()) {
+                long id = cursor.getLong(cursor.getColumnIndex(TodoNote._ID));
                 String content = cursor.getString(cursor.getColumnIndex(TodoNote.COLUMN_CONTENT));
                 long dateMs = cursor.getLong(cursor.getColumnIndex(TodoNote.COLUMN_DATE));
                 int intState = cursor.getInt(cursor.getColumnIndex(TodoNote.COLUMN_STATE));
 
-                Note note = new Note();
+                Note note = new Note(id);
                 note.setContent(content);
                 note.setDate(new Date(dateMs));
                 note.setState(State.from(intState));
@@ -143,6 +153,33 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return result;
+    }
+
+    private void deleteNote(Note note) {
+        if (database == null) {
+            return;
+        }
+        int rows = database.delete(TodoNote.TABLE_NAME,
+                TodoNote._ID + "=?",
+                new String[]{String.valueOf(note.id)});
+        if (rows > 0) {
+            notesAdapter.refresh(loadNotesFromDatabase());
+        }
+    }
+
+    private void updateNode(Note note) {
+        if (database == null) {
+            return;
+        }
+        ContentValues values = new ContentValues();
+        values.put(TodoNote.COLUMN_STATE, note.getState().intValue);
+
+        int rows = database.update(TodoNote.TABLE_NAME, values,
+                TodoNote._ID + "=?",
+                new String[]{String.valueOf(note.id)});
+        if (rows > 0) {
+            notesAdapter.refresh(loadNotesFromDatabase());
+        }
     }
 
 }
