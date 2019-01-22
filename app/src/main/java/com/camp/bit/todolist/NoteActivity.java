@@ -1,9 +1,7 @@
 package com.camp.bit.todolist;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -13,26 +11,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.camp.bit.todolist.beans.State;
-import com.camp.bit.todolist.db.TodoContract.TodoNote;
-import com.camp.bit.todolist.db.TodoDbHelper;
-
 public class NoteActivity extends AppCompatActivity {
 
     private EditText editText;
     private Button addBtn;
-
-    private TodoDbHelper dbHelper;
-    private SQLiteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note);
         setTitle(R.string.take_a_note);
-
-        dbHelper = new TodoDbHelper(this);
-        database = dbHelper.getWritableDatabase();
 
         editText = findViewById(R.id.edit_text);
         editText.setFocusable(true);
@@ -71,21 +59,10 @@ public class NoteActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        database.close();
-        database = null;
-        dbHelper.close();
-        dbHelper = null;
     }
 
     private boolean saveNote2Database(String content) {
-        if (database == null || TextUtils.isEmpty(content)) {
-            return false;
-        }
-        ContentValues values = new ContentValues();
-        values.put(TodoNote.COLUMN_CONTENT, content);
-        values.put(TodoNote.COLUMN_STATE, State.TODO.intValue);
-        values.put(TodoNote.COLUMN_DATE, System.currentTimeMillis());
-        long rowId = database.insert(TodoNote.TABLE_NAME, null, values);
-        return rowId != -1;
+        // TODO 插入一条新数据，返回是否插入成功
+        return false;
     }
 }
