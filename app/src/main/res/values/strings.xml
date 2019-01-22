@@ -9,4 +9,8 @@
     <!-- Debug -->
     <string name="print_absolute_path">Print absolute path</string>
     <string name="request_storage_permission">Request Storage Permission</string>
+
+    <!-- Note -->
+    <string name="take_a_note">Take a note</string>
+    <string name="confirm">Confirm</string>
 </resources>

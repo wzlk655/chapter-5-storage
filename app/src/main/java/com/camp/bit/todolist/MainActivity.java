@@ -1,11 +1,12 @@
 package com.camp.bit.todolist;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,6 +30,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CODE_ADD = 1002;
+
     private RecyclerView recyclerView;
     private NoteListAdapter notesAdapter;
 
@@ -46,8 +49,11 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                startActivityForResult(
+                        new Intent(MainActivity.this, NoteActivity.class),
+                        REQUEST_CODE_ADD);
             }
         });
 
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         notesAdapter = new NoteListAdapter();
         recyclerView.setAdapter(notesAdapter);
-        
+
         notesAdapter.refresh(loadNotesFromDatabase());
     }
 
@@ -69,7 +75,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         database.close();
+        database = null;
         dbHelper.close();
+        dbHelper = null;
     }
 
     @Override
@@ -94,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ADD
+                && resultCode == Activity.RESULT_OK) {
+            notesAdapter.refresh(loadNotesFromDatabase());
+        }
+    }
 
     private List<Note> loadNotesFromDatabase() {
         if (database == null) {

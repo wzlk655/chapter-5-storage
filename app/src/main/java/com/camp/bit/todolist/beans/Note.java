@@ -9,8 +9,8 @@ import java.util.Date;
  */
 public class Note {
 
-    private Date date;
-    private State state;
+    private Date date = new Date();
+    private State state = State.TODO;
     private String content;
 
     public Date getDate() {
