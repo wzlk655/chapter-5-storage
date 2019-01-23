@@ -14,6 +14,16 @@ public class Note {
     private State state;
     private String content;
 
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    private int priority;
+
     public Note(long id) {
         this.id = id;
     }

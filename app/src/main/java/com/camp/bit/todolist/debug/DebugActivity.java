@@ -1,6 +1,7 @@
 package com.camp.bit.todolist.debug;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,8 +15,16 @@ import android.widget.Toast;
 
 import com.camp.bit.todolist.R;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -65,7 +74,69 @@ public class DebugActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // TODO 把一段文本写入某个存储区的文件中，再读出来，显示在 fileText 上
-                fileText.setText("TODO");
+                String filename = "test";
+                String file_content = "Test content: \n" +
+                        "I'm written in a file named " +
+                        filename +
+                        " on " +
+                        getExternalFilesDir(null);
+                FileOutputStream outputStream;
+                try {
+                    outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                    outputStream.write(file_content.getBytes());
+                    outputStream.close();
+                }catch (Exception e){
+                    Toast.makeText(DebugActivity.this,"Failed to convert!", Toast.LENGTH_SHORT).show();
+                }
+                File directory = getApplicationContext().getExternalFilesDir(null);
+                File file = new File(directory, filename);
+                if(!file.exists()){
+                    try{
+                        file.createNewFile();
+                    }catch (Exception e){
+                        Toast.makeText(DebugActivity.this,"Failed to create file!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                FileWriter fileWriter = null;
+                BufferedWriter bufferedWriter = null;
+                try{
+                    fileWriter = new FileWriter(file);
+                    bufferedWriter = new BufferedWriter(fileWriter);
+                    bufferedWriter.write(file_content);
+                }catch (Exception e){
+                    fileText.setText(e.toString());
+                }finally {
+                    if(bufferedWriter!=null)
+                    {
+                        try{
+                            bufferedWriter.close();
+                        }catch (Exception e){
+                            fileText.setText(e.toString());
+                        }
+                    }
+                }
+
+                InputStream inputStream;
+                String line;
+                StringBuffer stringBuffer = new StringBuffer();
+
+                try {
+                    inputStream = new FileInputStream(file);
+                    Reader reader = new InputStreamReader(inputStream);
+                    BufferedReader bufferedReader = new BufferedReader(reader);
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuffer.append(line);
+                    }
+                    if (bufferedReader != null) {
+                        bufferedReader.close();
+                    }
+                    String content = stringBuffer.toString();
+                    fileText.setText(content);
+                } catch (Exception e) {
+                    Toast.makeText(DebugActivity.this,"Failed to read.", Toast.LENGTH_SHORT).show();
+                    fileText.setText(e.toString());
+                }
             }
         });
     }
